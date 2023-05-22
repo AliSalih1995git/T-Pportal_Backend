@@ -31,6 +31,7 @@ exports.getAllStudent = async (req, res) => {
       .json({ error: "An error occurred while retrieving the student." });
   }
 };
+
 //get single student
 exports.getSingleStudent = async (req, res) => {
   try {

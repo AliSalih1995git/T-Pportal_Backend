@@ -2,39 +2,40 @@ const Batch = require("../models/batch");
 const Result = require("../models/result");
 const Student = require("../models/student");
 
-exports.getAllStudentData = async (req, res) => {
+//get all parent Data
+exports.getAllParentData = async (req, res) => {
   try {
     const results = await Result.find().populate("student batch");
 
-    const populatedResults = await Promise.all(
+    const parentResults = await Promise.all(
       results.map(async (result) => {
         const student = await Student.findById(result.student._id);
-        const batch = await Batch.findById(result.batch._id);
-
         return {
-          name: student.name,
           parent: student.parent,
-          batches: batch.name,
-          marks: result.marks,
         };
       })
     );
-    res.status(200).json(populatedResults);
+    res.status(200).json(parentResults);
   } catch (error) {
-    console.log("Error fetching results:", error);
+    console.log(error);
   }
 };
 
-exports.getResultsByStudent = async (req, res) => {
+//get All student Data
+exports.getAllStudentData = async (req, res) => {
   try {
-    const { studentId } = req.params;
-    const results = await Result.find({ student: studentId }).populate(
-      "student batch"
-    );
-    res.status(200).json(results);
+    // console.log(req.query, "hhhh");
+    const { parent } = req.query;
+    const results = await Result.find().populate("student").populate("batch");
+
+    const filteredResults = results.filter((result) => {
+      if (result.student.parent === parent) {
+        return result;
+      }
+    });
+    // console.log(filteredResults, "filteredResults");
+    res.status(200).json(filteredResults);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "An error occurred while retrieving the results." });
+    console.log(error);
   }
 };
